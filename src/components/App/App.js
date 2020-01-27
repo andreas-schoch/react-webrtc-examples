@@ -1,8 +1,8 @@
 import React from 'react';
-import VideoCallMockup from '../VideoCallMockup/VideoCallMockup';
+import PeerToPeerVideo from '../PeerToPeerVideo/PeerToPeerVideo';
 
 const App = () => {
-    return <VideoCallMockup />;
+    return <PeerToPeerVideo />;
 };
 
 export default App;

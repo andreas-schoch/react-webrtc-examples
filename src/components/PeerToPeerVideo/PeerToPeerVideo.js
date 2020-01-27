@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './VideoCallMockup.module.scss';
+import styles from './PeerToPeerVideo.module.scss';
 import Peer from 'simple-peer';
 
-const Video = () => {
+const PeerToPeerVideo = () => {
     //////////////////////
     //// STATE & REFS ////
     //////////////////////
@@ -14,7 +14,7 @@ const Video = () => {
     const [remoteStream, setRemoteStream] = useState(null);
     const [initiator] = useState(window.location.hash === '#init');
     const [username] = useState(initiator ? 'PEER 1' : 'PEER 2');
-    const [messages] = useState([]);
+    // const [messages] = useState([]);
     const [inputState, setInputState] = useState({
         connectData: '',
         message: ''
@@ -46,13 +46,16 @@ const Video = () => {
     }, [remoteStream]);
 
     useEffect(() => {
-        console.log('TESTPEER', peer);
+        console.log('Peer', peer);
         if (peer) {
             peer.on('error', err => console.error('error', err));
 
             peer.on('signal', data => {
                 if (data.type === 'offer' || data.type === 'answer') {
                     console.log(`%c ${JSON.stringify(data)}`, 'background: #222; color: #bada55');
+                    alert(
+                        'open console and copy the console.log with the black background. Give it to the other peer to connect'
+                    );
                 }
             });
 
@@ -82,7 +85,7 @@ const Video = () => {
     //// METHODS ////
     /////////////////
     const initPeer = () => {
-        // trickle false prevents the lookout for "candidates" (I guess it scans your local network for devices it could connect to?)
+        // trickle false prevents the lookout for "ICE candidates" (Candidates are best ways to connect to peers or something like that)
         setPeer(new Peer({ initiator: initiator, trickle: false, stream: stream }));
     };
 
@@ -115,7 +118,6 @@ const Video = () => {
 
     const handleSendMessage = e => {
         e.preventDefault();
-
         console.log('sending message');
         sendMessage();
     };
@@ -133,13 +135,15 @@ const Video = () => {
                 <video ref={video} className={styles.video} />
 
                 <h2>Remote Stream</h2>
-                {/* will play a livestream of the remote webcam whenever call is ongoing and available */}
+                {/* will play a livestream of the remote webcam whenever connection is established stream and available */}
                 <video ref={remoteVideo} className={styles.video} />
             </div>
 
             <div className={styles.right}>
                 {/* click to start a livestream of your own webcam */}
                 <button onClick={handleStartStream}>Start My Stream</button>
+
+                {/* click to initialize this user as a peer */}
                 <button onClick={handleInitPeer}>{`Init This Peer ${initiator ? '(Generates Offer)' : ''}`}</button>
 
                 <form onSubmit={handleConnect} className={[styles.form, styles.connectForm].join(' ')}>
@@ -176,4 +180,17 @@ const Video = () => {
     );
 };
 
-export default Video;
+export default PeerToPeerVideo;
+
+/*
+THINGS TO LEARN ABOUT
+- NAT (NAT = Network Address Translation)
+- STUN SERVER ( STUN = Session Traversal of UDP Through NATs ) (also STUN = Session Traversal Utilities for NAT ) 
+- TURN SERVER ( TURN = Traversal Using Relay NAT )
+- SIGNALING
+- ICE CANDIDATES (ICE = Interactive Connectivity Establishment)
+- 
+
+
+
+*/
