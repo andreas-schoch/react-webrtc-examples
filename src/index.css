@@ -12,4 +12,8 @@ body {
 a {
     text-decoration: none;
     color: inherit;
+    background-color: lightgreen;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    border-radius: 5px;
 }

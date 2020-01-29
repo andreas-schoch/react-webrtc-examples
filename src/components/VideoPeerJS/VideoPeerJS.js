@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './PeerToPeerVideo.module.scss';
-import Peer from 'simple-peer';
+import styles from './VideoPeerJS.module.scss';
+import Peer from 'peerjs';
 
-const PeerToPeerVideo = () => {
+const VideoPeerJS = () => {
     //////////////////////
     //// STATE & REFS ////
     //////////////////////
@@ -10,6 +10,8 @@ const PeerToPeerVideo = () => {
     const remoteVideo = useRef(null);
 
     const [peer, setPeer] = useState(null);
+    const [connection, setConnection] = useState(null);
+
     const [stream, setStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [initiator] = useState(window.location.hash === '#init');
@@ -45,48 +47,51 @@ const PeerToPeerVideo = () => {
         }
     }, [remoteStream]);
 
+    // init event listeners for peer when peer is available
     useEffect(() => {
-        console.log('Peer', peer);
         if (peer) {
-            peer.on('error', err => console.error('error', err));
-
-            peer.on('signal', data => {
-                if (data.type === 'offer' || data.type === 'answer') {
-                    console.log(`%c ${JSON.stringify(data)}`, 'background: #222; color: #bada55');
-                    alert(
-                        'open console and copy the console.log with the black background. Give it to the other peer to connect'
-                    );
-                }
+            peer.on('open', id => {
+                console.log('My peer ID is: ' + id);
+                console.log('PEERr', peer);
             });
 
-            peer.on('connect', () => {
-                console.log('CONNECT');
-            });
-
-            peer.on('data', data => {
-                const parsedData = JSON.parse(data);
-                console.log('parsed', parsedData);
-
-                if (parsedData.message) {
-                    console.log(
-                        `%c MESSAGE - ${parsedData.message.author}: "${parsedData.message.text}"`,
-                        'background: black; color: white; padding: 1rem'
-                    );
-                }
-            });
-
-            peer.on('stream', remoteMediaStream => {
-                setRemoteStream(remoteMediaStream);
+            peer.on('connection', conn => {
+                console.log('connection', conn);
+                setConnection(conn);
             });
         }
     }, [peer]);
+
+    // init event listeners for connection when connection is established
+    useEffect(() => {
+        if (connection) {
+            console.log('CONNECTION ESTABLISHED');
+
+            connection.on('open', () => {
+                // connection.on('data', data => {
+                //     console.log('RECEIVED', data);
+                // });
+
+                connection.on('data', data => {
+                    const parsedData = JSON.parse(data);
+                    console.log('parsed', parsedData);
+
+                    if (parsedData.message) {
+                        console.log(
+                            `%c MESSAGE - ${parsedData.message.author}: "${parsedData.message.text}"`,
+                            'background: black; color: white; padding: 1rem'
+                        );
+                    }
+                });
+            });
+        }
+    }, [connection]);
 
     /////////////////
     //// METHODS ////
     /////////////////
     const initPeer = () => {
-        // trickle false prevents the lookout for "ICE candidates" (Candidates are best ways to connect to peers or something like that)
-        setPeer(new Peer({ initiator: initiator, trickle: false, stream: stream }));
+        setPeer(new Peer({ debug: true, config: { iceServers: [{ url: 'stun:stun.l.google.com:19302' }] } }));
     };
 
     const startStream = async () => {
@@ -99,13 +104,15 @@ const PeerToPeerVideo = () => {
     };
 
     const connect = () => {
-        peer.signal(JSON.parse(inputState.connectData));
+        setConnection(peer.connect(inputState.connectData));
     };
 
     const sendMessage = () => {
-        if (peer) {
+        if (peer && connection) {
             const message = { author: username, text: inputState.message };
-            peer.send(JSON.stringify({ message }));
+            connection.send(JSON.stringify({ message }));
+            console.log('sending message');
+            // connection.send('Hello!');
         }
     };
 
@@ -118,7 +125,7 @@ const PeerToPeerVideo = () => {
 
     const handleSendMessage = e => {
         e.preventDefault();
-        console.log('sending message');
+        // console.log('sending message');
         sendMessage();
     };
 
@@ -129,6 +136,7 @@ const PeerToPeerVideo = () => {
 
     return (
         <div className={styles.wrapper}>
+            <button onClick={() => console.log(peer.id)}>log id</button>
             <div className={styles.left}>
                 <h2>My Stream</h2>
                 {/* will play a livestream of your own webcam whenever available */}
@@ -180,7 +188,7 @@ const PeerToPeerVideo = () => {
     );
 };
 
-export default PeerToPeerVideo;
+export default VideoPeerJS;
 
 /*
 THINGS TO LEARN ABOUT
