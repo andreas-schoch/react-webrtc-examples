@@ -11,11 +11,12 @@ const VideoPeerJS = () => {
 
     const [peer, setPeer] = useState(null);
     const [connection, setConnection] = useState(null);
+    const [call, setCall] = useState(null);
 
     const [stream, setStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
-    const [initiator] = useState(window.location.hash === '#init');
-    const [username] = useState(initiator ? 'PEER 1' : 'PEER 2');
+    // const [initiator] = useState(window.location.hash === '#init');
+    // const [username] = useState(initiator ? 'PEER 1' : 'PEER 2');
     // const [messages] = useState([]);
     const [inputState, setInputState] = useState({
         connectData: '',
@@ -59,6 +60,14 @@ const VideoPeerJS = () => {
                 console.log('connection', conn);
                 setConnection(conn);
             });
+
+            peer.on('call', remoteCall => {
+                // Answer the call, providing our mediaStream
+                console.log('incoming call. Answering automatically');
+                setCall(remoteCall);
+                remoteCall.answer(stream);
+                // setRemoteStream(call);
+            });
         }
     }, [peer]);
 
@@ -87,6 +96,14 @@ const VideoPeerJS = () => {
         }
     }, [connection]);
 
+    useEffect(() => {
+        if (call) {
+            call.on('stream', remoteMediaStream => {
+                setRemoteStream(remoteMediaStream);
+            });
+        }
+    }, [call]);
+
     /////////////////
     //// METHODS ////
     /////////////////
@@ -109,10 +126,16 @@ const VideoPeerJS = () => {
 
     const sendMessage = () => {
         if (peer && connection) {
-            const message = { author: username, text: inputState.message };
+            const message = { author: 'derp', text: inputState.message };
             connection.send(JSON.stringify({ message }));
             console.log('sending message');
             // connection.send('Hello!');
+        }
+    };
+
+    const startCall = destinationPeerId => {
+        if (peer && connection && stream) {
+            setCall(peer.call(destinationPeerId, stream));
         }
     };
 
@@ -134,9 +157,12 @@ const VideoPeerJS = () => {
         connect();
     };
 
+    const handleStartCall = e => {
+        startCall(inputState.connectData);
+    };
+
     return (
         <div className={styles.wrapper}>
-            <button onClick={() => console.log(peer.id)}>log id</button>
             <div className={styles.left}>
                 <h2>My Stream</h2>
                 {/* will play a livestream of your own webcam whenever available */}
@@ -152,24 +178,25 @@ const VideoPeerJS = () => {
                 <button onClick={handleStartStream}>Start My Stream</button>
 
                 {/* click to initialize this user as a peer */}
-                <button onClick={handleInitPeer}>{`Init This Peer ${initiator ? '(Generates Offer)' : ''}`}</button>
+                <button onClick={handleInitPeer}>Init This Peer</button>
 
-                <form onSubmit={handleConnect} className={[styles.form, styles.connectForm].join(' ')}>
+                <form onSubmit={handleConnect} className={styles.form}>
                     <fieldset>
                         <legend>Connect</legend>
-                        <textarea
+                        <input
+                            type='text'
                             name='connectData'
                             id='connectData'
                             onChange={handleChange}
                             value={inputState.connectData}
-                            placeholder={`${initiator ? 'Enter Answer' : 'Enter Offer'} of other Peer`}
+                            placeholder='enter peer id you want to connect with'
                         />
 
-                        <button type='submit'>connect {!initiator ? '(Generates Answer)' : ''}</button>
+                        <button type='submit'>connect</button>
                     </fieldset>
                 </form>
 
-                <form onSubmit={handleSendMessage} className={[styles.form, styles.sendMessageForm].join(' ')}>
+                <form onSubmit={handleSendMessage} className={styles.form}>
                     <fieldset>
                         <legend>Send Message to Peer</legend>
                         <input
@@ -183,6 +210,9 @@ const VideoPeerJS = () => {
                         <button type='submit'>send</button>
                     </fieldset>
                 </form>
+
+                {/* click to start call */}
+                <button onClick={handleStartCall}>CALL</button>
             </div>
         </div>
     );
