@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import VideoSimplePeer from '../VideoSimplePeer/VideoSimplePeer';
 import VideoPeerJS from '../VideoPeerJS/VideoPeerJS';
 import VideoVanillaWebRTC from '../VideoVanillaWebRTC/VideoVanillaWebRTC';

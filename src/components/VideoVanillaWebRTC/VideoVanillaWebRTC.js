@@ -20,7 +20,7 @@ const VideoVanillaWebRTC = () => {
     const [peerConnection, setPeerConnection] = useState(null);
     // const [localIceCandidates, setLocalIceCandidates] = useState([]);
 
-    const [initiator] = useState(window.location.hash === '#init');
+    const [initiator, setInitiator] = useState(false);
     const [inputState, setInputState] = useState({
         description: '',
         message: '',
@@ -157,11 +157,16 @@ const VideoVanillaWebRTC = () => {
             </div>
 
             <div className={styles.right}>
+                <button onClick={() => setInitiator(!initiator)}>
+                    {initiator ? 'Change to receiving Peer' : 'Change to Initializing Peer'}
+                </button>
+
                 {/* click to start a livestream of your own webcam */}
                 <button onClick={startStream}>Start My Stream</button>
 
                 {/* click to initialize this user as a peer */}
                 <button onClick={handleCreatePeerConnection}>{`Init This Peer ${initiator ? '(Generates Offer)' : ''}`}</button>
+
 
                 <form onSubmit={handleConnect} className={[styles.form, styles.connectForm].join(' ')}>
                     <fieldset>
@@ -189,7 +194,7 @@ const VideoVanillaWebRTC = () => {
                             placeholder='Enter the ICE Candidates of the other peer'
                         />
 
-                        <button type='submit'>connect {!initiator ? '(Generates Answer)' : ''}</button>
+                        <button type='submit'>Add Candidates</button>
                     </fieldset>
                 </form>
 
@@ -233,3 +238,6 @@ export default VideoVanillaWebRTC;
 - TURN SERVER ( TURN = Traversal Using Relay NAT )
 - ICE CANDIDATES (ICE = Interactive Connectivity Establishment)
 */
+
+
+// TODO add dataChannel to send messages

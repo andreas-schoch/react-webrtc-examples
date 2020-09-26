@@ -12,7 +12,7 @@ const VideoSimplePeer = () => {
     const [peer, setPeer] = useState(null);
     const [stream, setStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
-    const [initiator] = useState(window.location.hash === '#init');
+    const [initiator, setInitiator] = useState(false);
     const [username] = useState(initiator ? 'PEER 1' : 'PEER 2');
     // const [messages] = useState([]);
     const [inputState, setInputState] = useState({
@@ -140,6 +140,10 @@ const VideoSimplePeer = () => {
             </div>
 
             <div className={styles.right}>
+                <button onClick={() => setInitiator(!initiator)}>
+                    {initiator ? 'Change to receiving Peer' : 'Change to Initializing Peer'}
+                </button>
+
                 {/* click to start a livestream of your own webcam */}
                 <button onClick={handleStartStream}>Start My Stream</button>
 
@@ -185,11 +189,11 @@ export default VideoSimplePeer;
 /*
 THINGS TO LEARN ABOUT
 - NAT (NAT = Network Address Translation)
-- STUN SERVER ( STUN = Session Traversal of UDP Through NATs ) (also STUN = Session Traversal Utilities for NAT ) 
+- STUN SERVER ( STUN = Session Traversal of UDP Through NATs ) (also STUN = Session Traversal Utilities for NAT )
 - TURN SERVER ( TURN = Traversal Using Relay NAT )
 - SIGNALING
 - ICE CANDIDATES (ICE = Interactive Connectivity Establishment)
-- 
+-
 
 
 
