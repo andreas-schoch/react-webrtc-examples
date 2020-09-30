@@ -6,7 +6,7 @@ The necessary information (SDP, ICE Candidates, etc.) will be displayed but need
 This project was only made to learn and experiment with webrtc.
 
 
-![alt text](./react-webrtc-examples-peerjs.jpg?raw=true "Screenshot")
+![alt text](./react-webrtc-examples-peerjs.JPG?raw=true "Screenshot")
 
 
 ## Current examples:
